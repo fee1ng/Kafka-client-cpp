@@ -58,7 +58,6 @@ int msg_consume(std::vector<char> &data, RdKafka::Message *message, void *opaque
         break;
     case RdKafka::ERR_NO_ERROR:
     {
-        //std::cout << "msg offset = " << message->offset() << std::endl;
         if (message->payload())
         {
             len = static_cast<int>(message->len());
@@ -93,7 +92,6 @@ public:
     ~KafkaConsumer();
 
     bool Init(const std::string &host, const int port, const std::string &groupid);
-    //static void Recv(const int timeout = 1000);
     static void Recv(const int timeout = 1000,int index_consumer = 0);
     void Consume();
 

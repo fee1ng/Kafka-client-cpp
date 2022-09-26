@@ -10,17 +10,12 @@ void sigterm(int sig)
 
 int main(int argc, char const *argv[])
 {
-    //signal(SIGINT, sigterm);
-    //signal(SIGTERM, sigterm);
-    //signal(SIGKILL, sigterm);
-
     KafkaConsumer consumer;
     //std::string topic = "heima";
     std::vector<std::string> topics = {"heima","test02"};
     consumer.SetTopic(topics);    
     consumer.Init("127.0.0.1", 9092, "101");
     consumer.Consume();
-    //consumer.Recv(1000);
     if(run == false)
     {
         std::cout << "stop consumer" << std::endl;
