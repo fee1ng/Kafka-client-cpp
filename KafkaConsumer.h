@@ -110,7 +110,7 @@ private:
     std::shared_ptr<RdKafka::Conf> m_tconf{nullptr};
     static std::shared_ptr<RdKafka::KafkaConsumer> m_consumer;
     static std::vector<std::shared_ptr<RdKafka::KafkaConsumer>> vec_consumer;
-    int vec_consumer_size = 0;
+    int vec_consumer_num = 0;
     static bool m_run;
     std::shared_ptr<EventCB> m_eventcb{nullptr};
     static std::mutex mtx_vec_consumer;
@@ -122,7 +122,7 @@ std::mutex KafkaConsumer::mtx_vec_consumer;
 
 KafkaConsumer::KafkaConsumer()
 {
-    //vec_consumer.resize(5);
+
 }
 
 KafkaConsumer::~KafkaConsumer()
@@ -214,27 +214,14 @@ bool KafkaConsumer::Init(const std::string &host, const int port, const std::str
             std::vector<RdKafka::TopicPartition*> topicpartions;
             std::cout << data->topic() << " has partion: " << value->id() << " Leader is : " << value->leader() << std::endl;
             topicpartions.push_back(RdKafka::TopicPartition::create(data->topic(), value->id(), RdKafka::Topic::OFFSET_END));
-            vec_consumer[vec_consumer_size++]->assign(topicpartions);
+            vec_consumer[vec_consumer_num++]->assign(topicpartions);
         }); });
-
-    /*
-        //创建topic的分区数组，设置每个分区从最后一位offset开始消费
-        std::vector<RdKafka::TopicPartition*> topicpartions;
-        std::for_each(subTopicMetaVec.begin(), subTopicMetaVec.end(), [&topicpartions](const RdKafka::TopicMetadata* data) {
-            auto parVec = data->partitions();
-            std::for_each(parVec->begin(), parVec->end(), [&](const RdKafka::PartitionMetadata *value) {
-                std::cout << data->topic() << " has partion: " << value->id() << " Leader is : " << value->leader() << std::endl;
-                // value->id()即为partition，可以根据partition -> offset 手动设置
-                topicpartions.push_back(RdKafka::TopicPartition::create(data->topic(), value->id(), RdKafka::Topic::OFFSET_END));
-            });
-        });
-        m_consumer->assign(topicpartions);
-    */
+        
     m_run = true;
     return true;
 }
 /*
-static void KafkaConsumer::Recv(const int timeout)
+static void KafkaConsumer::Recv(const int timeout,int index_consumer)
 {
     while (m_run)
     {
@@ -249,6 +236,7 @@ static void KafkaConsumer::Recv(const int timeout)
             {
                 std::cout << "msg offset = " << msg->offset() << std::endl;
                 std::cout << data.data() << std::endl;
+                std::cout << "index_consumer = " << i << std::endl;
             }
         }
     }
@@ -261,6 +249,7 @@ static void KafkaConsumer::Recv(const int timeout,int index_consumer)
         // 指定n个消费者中的一个消费者
         std::unique_lock<std::mutex> lck_vec_consumer(mtx_vec_consumer);
         m_consumer = vec_consumer[index_consumer];
+        lck_vec_consumer.unlock();
         std::vector<char> data;
         std::shared_ptr<RdKafka::Message> msg = std::shared_ptr<RdKafka::Message>(m_consumer->consume(timeout));
         int len = msg_consume(data, msg.get(), NULL);
@@ -268,18 +257,23 @@ static void KafkaConsumer::Recv(const int timeout,int index_consumer)
         {
             std::cout << "msg offset = " << msg->offset() << std::endl;
             std::cout << data.data() << std::endl;
+            std::cout << "index_consumer = " << index_consumer << std::endl;
         }
     }
 }
 
 void KafkaConsumer::Consume() {
     std::vector<std::thread> vec_thread;
+    std::cout << "vec_consumer.size() = " << vec_consumer.size() << std::endl;
+    //Recv(1000,0);
+    
     for(int i = 0;i < vec_consumer.size();i++) {
         std::thread t(Recv,1000,i);
         vec_thread.emplace_back(std::move(t));
     }
 
     for(int i = 0;i < vec_thread.size();i++) {
-        vec_thread[i].join();
+        vec_thread[i].detach();
     }
+    
 }

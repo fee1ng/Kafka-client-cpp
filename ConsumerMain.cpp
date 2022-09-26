@@ -18,7 +18,7 @@ int main(int argc, char const *argv[])
     //std::string topic = "heima";
     std::vector<std::string> topics = {"heima","test02"};
     consumer.SetTopic(topics);    
-    consumer.Init("localhost", 9092, "101");
+    consumer.Init("127.0.0.1", 9092, "101");
     consumer.Consume();
     //consumer.Recv(1000);
     if(run == false)
@@ -26,6 +26,7 @@ int main(int argc, char const *argv[])
         std::cout << "stop consumer" << std::endl;
         consumer.Stop();
     }
+    while(getchar() != '\n')
     return 0;
 }
 
