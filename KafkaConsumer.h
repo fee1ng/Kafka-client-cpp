@@ -65,6 +65,7 @@ int msg_consume(std::vector<char> &data, RdKafka::Message *message, void *opaque
             data.resize(len);
             const char *msg = static_cast<const char *>(message->payload());
             memcpy(&data[0], msg, len);
+            printf("%.*s\n", static_cast<int>(message->len()), static_cast<const char *>(message->payload()));
         }
     }
     break;
@@ -216,7 +217,7 @@ bool KafkaConsumer::Init(const std::string &host, const int port, const std::str
             topicpartions.push_back(RdKafka::TopicPartition::create(data->topic(), value->id(), RdKafka::Topic::OFFSET_END));
             vec_consumer[vec_consumer_num++]->assign(topicpartions);
         }); });
-        
+
     m_run = true;
     return true;
 }
@@ -256,7 +257,7 @@ static void KafkaConsumer::Recv(const int timeout,int index_consumer)
         if (len > 0)
         {
             std::cout << "msg offset = " << msg->offset() << std::endl;
-            std::cout << data.data() << std::endl;
+            //std::cout << data.data() << std::endl;
             std::cout << "index_consumer = " << index_consumer << std::endl;
         }
     }
