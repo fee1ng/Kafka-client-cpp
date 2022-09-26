@@ -14,7 +14,7 @@ int main(int argc, char const *argv[])
     //std::string topic = "heima";
     std::vector<std::string> topics = {"heima","test02"};
     consumer.SetTopic(topics);    
-    consumer.Init("127.0.0.1", 9092, "101");
+    consumer.Init("127.0.0.1", 9092, "101",5);
     consumer.Consume();
     if(run == false)
     {

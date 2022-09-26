@@ -91,7 +91,7 @@ public:
     KafkaConsumer();
     ~KafkaConsumer();
 
-    bool Init(const std::string &host, const int port, const std::string &groupid);
+    bool Init(const std::string &host, const int port, const std::string &groupid,int partition_size);
     static void Recv(const int timeout = 1000,int index_consumer = 0);
     void Consume();
 
@@ -144,7 +144,7 @@ void KafkaConsumer::SetTopic(const std::vector<std::string> &topics)
     m_topics.assign(topics.begin(), topics.end());
 }
 
-bool KafkaConsumer::Init(const std::string &host, const int port, const std::string &groupid)
+bool KafkaConsumer::Init(const std::string &host, const int port, const std::string &groupid,int partition_size)
 {
     m_conf = std::shared_ptr<RdKafka::Conf>(RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL));
     m_tconf = std::shared_ptr<RdKafka::Conf>(RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC));
@@ -175,7 +175,7 @@ bool KafkaConsumer::Init(const std::string &host, const int port, const std::str
     m_conf->set("event_cb", m_eventcb.get(), errstr);
     m_conf->set("default_topic_conf", m_tconf.get(), errstr);
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < partition_size; i++)
     {
         m_consumer = std::shared_ptr<RdKafka::KafkaConsumer>(RdKafka::KafkaConsumer::create(m_conf.get(), errstr));
         if (m_consumer == nullptr)
